@@ -17,7 +17,7 @@ class marker():
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
             marker = Marker()
-
+            marker.header.frame_id = "odom" #header frame
             marker.type = Marker.SPHERE
             marker.pose.position.x = 1
             marker.pose.position.y = 2

@@ -5,8 +5,7 @@ import sys, select, termios, tty
 from geometry_msgs.msg import Twist, Vector3
 
 
-
-
+  
 
 class wall_follow:
     def __init__(self):
