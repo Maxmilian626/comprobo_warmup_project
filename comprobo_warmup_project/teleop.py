@@ -7,34 +7,39 @@ from geometry_msgs.msg import Twist, Vector3
 
 
 #is it possible to tank drive a neato? Control each side separately?
-#Still only require 4 buttons.  
+#Still only require 4 buttons.
 
-class wall_follow:
+class teleop:
     def __init__(self):
-        rospy.init_node('estop')
+        rospy.init_node('teleop')
         self.pub = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
         self.rate = rospy.Rate(10)
-        self.sub = rospy.Subscriber('/bump',Bump, self.callback)
+        #self.sub = rospy.Subscriber('/bump',Bump, self.callback)
         self.speed = .5 #speed variable.
         self.turn = 1.0 #turn variable.
+        self.settings = ""
 
         self.switch = { #different cases
-        'forward':(1,0,0,0),
-        'backwards':(-1,0,0,0),
-        'left_turn':(0,0,0,1),
-        'stop':(0,0,0,0)
+        'w':(1,0,0,0), #Forward
+        's':(-1,0,0,0), #Backward
+        'a':(0,0,0,1), #Left Turn
+        'd':(0,0,0,-1), #Right Turn
+        'q':(0,0,0,0) #Stop
         }
 
         self.state = 'forward'
 
     def process_callback(self):
             #switch it to simply one of the cases.
+        self.settings = termios.tcgetattr(sys.stdin)
         speed = self.speed
         turn = self.turn
-        key = self.state #callback will give the state.
+        key = self.getKey() #callback will give the state.
         print key
 
+
         #if (self.getKey() =='\x03'): #ctrl^C to quit.
+
         #    key = 'stop'
         if key in self.switch.keys():
             x = self.switch[key][0]
@@ -53,17 +58,17 @@ class wall_follow:
         twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = th*turn
         self.pub.publish(twist)
 
-    def callback(self, msg): #only happens when it gets a message.
-        print "getting bump sensor"
-        if any((msg.leftFront, msg.leftSide, msg.rightFront, msg.rightSide)):
-             self.state = 'stop'
-             print "stop"
+    # def callback(self, msg): #only happens when it gets a message.
+    #     print "getting bump sensor"
+    #     if any((msg.leftFront, msg.leftSide, msg.rightFront, msg.rightSide)):
+    #          self.state = 'stop'
+    #          print "stop"
 
     def getKey(self):
     	tty.setraw(sys.stdin.fileno())
     	select.select([sys.stdin], [], [], 0)
     	key = sys.stdin.read(1)
-    	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+    	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
         return key
 
     def run(self):
@@ -73,5 +78,5 @@ class wall_follow:
         r.sleep()
 
 if __name__ == '__main__':
-    node = estop()
+    node = teleop()
     node.run()
