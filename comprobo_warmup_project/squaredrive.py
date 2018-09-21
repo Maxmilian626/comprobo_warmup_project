@@ -82,9 +82,9 @@ class square_drive:
 
         calibrate_range = []
         #hopefully we get receive a message from scan.
-        for x in range(10):
-            if (len(self.ranges) > 359) and (self.ranges[0] != 0):
-                calibrate_range.append(msg.ranges)
+        for x in range(-5,5, 1):
+            if (len(self.ranges) > 359) and (self.ranges[x] != 0):
+                calibrate_range.append(msg.ranges[x])
         distance = np.mean(calibrate_range)
         self.scan_scale = distance / self.neato_size
         self.state = 'calibrated'
@@ -100,7 +100,7 @@ class square_drive:
             self.key = 'backwards'
             self.act()
             distance_duration += 1
-            current_scant = self.ranges[0]
+            current_scan = self.ranges[0]
             print self.key
 
         self.drive_duration_scale = distance_duration / 150
@@ -143,20 +143,9 @@ class square_drive:
             current_duration +=1
 
 
-    def scan(self, angle):
-        measure_range = []
-        #hopefully we get receive a message from scan.
-        for x in range(10):
-            if (len(self.ranges) > 359) and (self.ranges[0] != angle):
-                measure_range.append(msg.ranges)
-        distance = np.mean(measure_range)
-        return distance
-
     def simple_square(self):
         self.drive_forward(100)
         self.drive_turn(90)
-
-
 
 
     def run(self):
